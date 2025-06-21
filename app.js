@@ -340,7 +340,7 @@ server.listen(PORT, () => {
   console.log(`🚀 Deepgram AI Phone Platform (SaaS) running on port ${PORT}`);
   console.log(`📞 Webhook URL: http://localhost:${PORT}/webhook/call`);
   console.log(`🔊 Voice: Aura 2 (Odysseus)`);
-  console.log(`🔑 Admin Login: admin@deepgram-ai.com / admin123!@#`);
+  console.log(`🔑 Admin Login: admin@deepgram-ai.com / Admin123!@#`);
   console.log(`🏢 SaaS Features: User Management, Admin Dashboard, Reseller Portal`);
 });
 

@@ -17,7 +17,7 @@ class AuthManager extends EventEmitter {
   async createDefaultAdmin() {
     // Create default admin user if it doesn't exist
     const adminEmail = process.env.DEFAULT_ADMIN_EMAIL || 'admin@deepgram-ai.com';
-    const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'admin123!@#';
+    const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'Admin123!@#';
     
     if (!this.getUserByEmail(adminEmail)) {
       await this.createUser({
