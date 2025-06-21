@@ -10,7 +10,9 @@
     "build": "npm install",
     "deploy": "git push origin main",
     "setup-production": "node setup-production.js",
-    "setup": "node setup-production.js"
+    "setup": "node setup-production.js",
+    "create-admin": "node create-admin.js",
+    "admin": "node create-admin.js"
   },
   "keywords": [
     "ai",

@@ -414,6 +414,9 @@ async function startServer() {
   try {
     await initDatabase();
     
+    // Create default admin account
+    await authManager.createDefaultAdmin();
+    
     server.listen(PORT, () => {
       console.log(`🚀 Deepgram AI Phone Platform (SaaS) running on port ${PORT}`);
       console.log(`📞 Webhook URL: http://localhost:${PORT}/webhook/call`);
@@ -421,6 +424,7 @@ async function startServer() {
       console.log(`🔑 Admin Login: admin@deepgram-ai.com / Admin123!@#`);
       console.log(`🏢 SaaS Features: User Management, Admin Dashboard, Reseller Portal`);
       console.log(`🗄️ Database: SQLite with user management enabled`);
+      console.log(`👥 Create custom admin: node create-admin.js`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

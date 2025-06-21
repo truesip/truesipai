@@ -3,15 +3,14 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 const EventEmitter = require('events');
+const { User } = require('../database/models');
 
 class AuthManager extends EventEmitter {
   constructor() {
     super();
-    this.users = new Map();
     this.sessions = new Map();
     this.passwordResetTokens = new Map();
     this.emailVerificationTokens = new Map();
-    this.createDefaultAdmin();
   }
 
   async createDefaultAdmin() {
@@ -19,17 +18,24 @@ class AuthManager extends EventEmitter {
     const adminEmail = process.env.DEFAULT_ADMIN_EMAIL || 'admin@deepgram-ai.com';
     const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'Admin123!@#';
     
-    if (!this.getUserByEmail(adminEmail)) {
-      await this.createUser({
-        email: adminEmail,
-        password: adminPassword,
-        firstName: 'System',
-        lastName: 'Administrator',
-        role: 'super_admin',
-        emailVerified: true,
-        status: 'active'
-      });
-      console.log(`🔑 Default admin created: ${adminEmail}`);
+    try {
+      const existingAdmin = await User.findOne({ where: { email: adminEmail } });
+      if (!existingAdmin) {
+        await this.createUser({
+          email: adminEmail,
+          password: adminPassword,
+          firstName: 'System',
+          lastName: 'Administrator',
+          role: 'admin',
+          company: 'Deepgram AI Platform',
+          subscription: 'enterprise',
+          subscriptionStatus: 'active',
+          minutesLimit: -1 // unlimited
+        });
+        console.log(`🔑 Default admin created: ${adminEmail}`);
+      }
+    } catch (error) {
+      console.error('Error creating default admin:', error);
     }
   }
 
@@ -40,9 +46,10 @@ class AuthManager extends EventEmitter {
       firstName,
       lastName,
       role = 'user',
-      companyName,
-      phone,
-      emailVerified = false
+      company,
+      subscription = 'starter',
+      subscriptionStatus = 'active',
+      minutesLimit = 100
     } = userData;
 
     // Validate email format
@@ -51,7 +58,8 @@ class AuthManager extends EventEmitter {
     }
 
     // Check if user already exists
-    if (this.getUserByEmail(email)) {
+    const existingUser = await User.findOne({ where: { email: email.toLowerCase() } });
+    if (existingUser) {
       throw new Error('User with this email already exists');
     }
 
@@ -60,78 +68,42 @@ class AuthManager extends EventEmitter {
       throw new Error('Password must be at least 8 characters with uppercase, lowercase, number and special character (@$!%*?&#)');
     }
 
-    const userId = uuidv4();
     const hashedPassword = await bcrypt.hash(password, 12);
     const apiKey = this.generateApiKey();
-    const secretKey = this.generateSecretKey();
 
-    const user = {
-      id: userId,
+    const user = await User.create({
       email: email.toLowerCase(),
       password: hashedPassword,
       firstName,
       lastName,
-      role, // 'super_admin', 'admin', 'reseller', 'user'
-      companyName,
-      phone,
+      company,
+      role,
+      subscription,
+      subscriptionStatus,
       apiKey,
-      secretKey,
-      emailVerified,
-      status: 'active', // 'active', 'inactive', 'suspended', 'pending'
-      subscription: {
-        tier: role === 'reseller' ? 'reseller' : 'starter',
-        status: 'active',
-        startDate: new Date(),
-        nextBillingDate: this.getNextBillingDate()
-      },
-      settings: {
-        twoFactorEnabled: false,
-        emailNotifications: true,
-        smsNotifications: false,
-        timezone: 'UTC'
-      },
-      metadata: {
-        lastLogin: null,
-        loginCount: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        createdBy: userData.createdBy || 'system'
-      },
-      permissions: this.getDefaultPermissions(role)
-    };
-
-    this.users.set(userId, user);
-
-    // Generate email verification token if needed
-    if (!emailVerified) {
-      const verificationToken = this.generateEmailVerificationToken(userId);
-      this.emit('userRegistered', { user, verificationToken });
-    }
+      minutesLimit,
+      isActive: true
+    });
 
     this.emit('userCreated', user);
-    return { ...user, password: undefined }; // Don't return password
+    return user.toJSON();
   }
 
   async authenticateUser(email, password) {
-    const user = this.getUserByEmail(email);
+    const user = await User.findOne({ where: { email: email.toLowerCase() } });
     
     if (!user) {
       throw new Error('Invalid credentials');
     }
 
-    if (user.status !== 'active') {
-      throw new Error(`Account is ${user.status}`);
+    if (!user.isActive) {
+      throw new Error('Account is inactive');
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       throw new Error('Invalid credentials');
     }
-
-    // Update login metadata
-    user.metadata.lastLogin = new Date();
-    user.metadata.loginCount++;
-    this.users.set(user.id, user);
 
     // Generate session token
     const sessionToken = this.generateSessionToken(user);
@@ -149,22 +121,22 @@ class AuthManager extends EventEmitter {
     this.emit('userLoggedIn', { user, session });
 
     return {
-      user: { ...user, password: undefined },
+      user: user.toJSON(),
       token: sessionToken,
       expiresAt: session.expiresAt
     };
   }
 
-  verifyToken(token) {
+  async verifyToken(token) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-      const user = this.users.get(decoded.userId);
+      const user = await User.findByPk(decoded.userId);
       
-      if (!user || user.status !== 'active') {
+      if (!user || !user.isActive) {
         return null;
       }
 
-      return { ...user, password: undefined };
+      return user.toJSON();
     } catch (error) {
       return null;
     }
@@ -266,35 +238,37 @@ class AuthManager extends EventEmitter {
     return true;
   }
 
-  getUserByEmail(email) {
-    for (const user of this.users.values()) {
-      if (user.email === email.toLowerCase()) {
-        return user;
-      }
-    }
-    return null;
+  async getUserByEmail(email) {
+    const user = await User.findOne({ where: { email: email.toLowerCase() } });
+    return user ? user.toJSON() : null;
   }
 
-  getUserById(userId) {
-    return this.users.get(userId);
+  async getUserById(userId) {
+    const user = await User.findByPk(userId);
+    return user ? user.toJSON() : null;
   }
 
-  getAllUsers(filters = {}) {
-    let users = Array.from(this.users.values());
+  async getAllUsers(filters = {}) {
+    const whereClause = {};
 
     if (filters.role) {
-      users = users.filter(user => user.role === filters.role);
+      whereClause.role = filters.role;
     }
 
-    if (filters.status) {
-      users = users.filter(user => user.status === filters.status);
+    if (filters.subscriptionStatus) {
+      whereClause.subscriptionStatus = filters.subscriptionStatus;
     }
 
-    if (filters.emailVerified !== undefined) {
-      users = users.filter(user => user.emailVerified === filters.emailVerified);
+    if (filters.isActive !== undefined) {
+      whereClause.isActive = filters.isActive;
     }
 
-    return users.map(user => ({ ...user, password: undefined }));
+    const users = await User.findAll({ 
+      where: whereClause,
+      attributes: { exclude: ['password'] } // Don't return passwords
+    });
+    
+    return users.map(user => user.toJSON());
   }
 
   updateUser(userId, updates) {
