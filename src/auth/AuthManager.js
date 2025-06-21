@@ -57,7 +57,7 @@ class AuthManager extends EventEmitter {
 
     // Validate password strength
     if (!this.isValidPassword(password)) {
-      throw new Error('Password must be at least 8 characters with uppercase, lowercase, number and special character');
+      throw new Error('Password must be at least 8 characters with uppercase, lowercase, number and special character (@$!%*?&#)');
     }
 
     const userId = uuidv4();
@@ -404,7 +404,7 @@ class AuthManager extends EventEmitter {
 
   isValidPassword(password) {
     // At least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
     return passwordRegex.test(password);
   }
 
