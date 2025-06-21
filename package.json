@@ -12,7 +12,9 @@
     "setup-production": "node setup-production.js",
     "setup": "node setup-production.js",
     "create-admin": "node create-admin.js",
-    "admin": "node create-admin.js"
+    "admin": "node create-admin.js",
+    "enterprise": "node start-enterprise.js",
+    "start-enterprise": "node start-enterprise.js"
   },
   "keywords": [
     "ai",
@@ -50,7 +52,16 @@
     "passport-local": "^1.0.0",
     "openai": "^4.20.1",
     "sqlite3": "^5.1.6",
-    "sequelize": "^6.35.0"
+    "sequelize": "^6.35.0",
+    "speakeasy": "^2.0.0",
+    "qrcode": "^1.5.3",
+    "stripe": "^14.7.0",
+    "node-cron": "^3.0.3",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.32.6",
+    "winston": "^3.11.0",
+    "compression": "^1.7.4",
+    "express-validator": "^7.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
