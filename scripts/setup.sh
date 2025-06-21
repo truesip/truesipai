@@ -43,6 +43,7 @@ npm install
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ Dependencies installed successfully${NC}"
+    echo -e "${GREEN}✅ package-lock.json generated${NC}"
 else
     echo -e "${RED}❌ Failed to install dependencies${NC}"
     exit 1

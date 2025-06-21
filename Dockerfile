@@ -8,24 +8,33 @@ WORKDIR /app
 RUN apk add --no-cache \
     curl \
     bash \
+    git \
     && rm -rf /var/cache/apk/*
 
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install dependencies (use npm install if no lock file exists)
+RUN if [ -f "package-lock.json" ]; then \
+      npm ci --only=production; \
+    else \
+      npm install --only=production; \
+    fi && \
+    npm cache clean --force
 
 # Copy application code
 COPY . .
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
+    adduser -S appuser -u 1001 -G nodejs
 
-# Change ownership of the app directory
-RUN chown -R nextjs:nodejs /app
-USER nextjs
+# Create necessary directories
+RUN mkdir -p logs recordings tmp data && \
+    chown -R appuser:nodejs /app
+
+# Switch to non-root user
+USER appuser
 
 # Expose port
 EXPOSE 3000
