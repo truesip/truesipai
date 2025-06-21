@@ -1,0 +1,134 @@
+name: deepgram-ai-phone-platform
+region: nyc
+services:
+- name: api
+  source_dir: /
+  github:
+    repo: yourusername/deepgram-ai-phone-platform
+    branch: main
+    deploy_on_push: true
+  run_command: npm start
+  environment_slug: node-js
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  http_port: 3000
+  health_check:
+    http_path: /health
+    initial_delay_seconds: 10
+    period_seconds: 10
+    timeout_seconds: 5
+    success_threshold: 1
+    failure_threshold: 3
+  env:
+  - key: NODE_ENV
+    value: production
+  - key: PORT
+    value: "3000"
+  - key: DEEPGRAM_API_KEY
+    value: "${DEEPGRAM_API_KEY}"
+    type: SECRET
+  - key: TWILIO_ACCOUNT_SID
+    value: "${TWILIO_ACCOUNT_SID}"
+    type: SECRET
+  - key: TWILIO_AUTH_TOKEN
+    value: "${TWILIO_AUTH_TOKEN}"
+    type: SECRET
+  - key: TWILIO_PHONE_NUMBER
+    value: "${TWILIO_PHONE_NUMBER}"
+    type: SECRET
+  - key: OPENAI_API_KEY
+    value: "${OPENAI_API_KEY}"
+    type: SECRET
+  - key: JWT_SECRET
+    value: "${JWT_SECRET}"
+    type: SECRET
+  - key: ENCRYPTION_KEY
+    value: "${ENCRYPTION_KEY}"
+    type: SECRET
+  - key: WEBHOOK_BASE_URL
+    value: "https://${APP_URL}"
+  - key: ALLOWED_ORIGINS
+    value: "https://${APP_URL},https://api.${APP_URL}"
+  routes:
+  - path: /
+  - path: /api
+  - path: /webhook
+  - path: /stream
+  cors:
+    allow_origins:
+    - exact: "https://${APP_URL}"
+    - exact: "https://api.${APP_URL}"
+    allow_headers:
+    - Content-Type
+    - Authorization
+    - X-Requested-With
+    allow_methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+    allow_credentials: true
+
+# Optional: Add a database if needed
+# databases:
+# - name: ai-phone-db
+#   engine: PG
+#   version: "14"
+#   size: basic
+#   num_nodes: 1
+
+# Optional: Add Redis for caching
+# - name: ai-phone-cache
+#   engine: REDIS
+#   version: "7"
+#   size: basic
+
+# Static site for admin dashboard (optional)
+# - name: admin-dashboard
+#   source_dir: /dashboard
+#   github:
+#     repo: yourusername/deepgram-ai-phone-platform
+#     branch: main
+#     deploy_on_push: true
+#   build_command: npm run build
+#   output_dir: /build
+#   environment_slug: node-js
+#   routes:
+#   - path: /admin
+
+domains:
+- domain: your-domain.com
+  type: PRIMARY
+  wildcard: false
+  zone: your-domain.com
+- domain: api.your-domain.com
+  type: ALIAS
+  wildcard: false
+  zone: your-domain.com
+
+# Auto-scaling configuration
+scaling:
+  min_instance_count: 1
+  max_instance_count: 5
+  target_cpu_percent: 70
+  target_memory_percent: 80
+
+# Alerts configuration
+alerts:
+- rule: CPU_UTILIZATION
+  value: 80
+  operator: GREATER_THAN
+  window: FIVE_MINUTES
+  disabled: false
+- rule: MEM_UTILIZATION
+  value: 85
+  operator: GREATER_THAN
+  window: FIVE_MINUTES
+  disabled: false
+- rule: RESTART_COUNT
+  value: 3
+  operator: GREATER_THAN
+  window: FIVE_MINUTES
+  disabled: false
+
