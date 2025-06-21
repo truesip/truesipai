@@ -8,6 +8,7 @@ const VoiceResponse = require('twilio').twiml.VoiceResponse;
 const { createClient } = require('@deepgram/sdk');
 const WebSocket = require('ws');
 const path = require('path');
+const OpenAI = require('openai');
 require('dotenv').config();
 
 // Import SaaS components
@@ -17,6 +18,7 @@ const ResellerManager = require('./src/reseller/ResellerManager');
 const { createAuthRoutes } = require('./src/routes/auth');
 const { createAdminRoutes } = require('./src/routes/admin');
 const { authenticateToken, validateApiKey, requireActiveSubscription } = require('./src/middleware/auth');
+const { initDatabase, User, Call, AIAgent } = require('./src/database/models');
 
 const app = express();
 const server = createServer(app);
@@ -62,6 +64,11 @@ app.use('/api/', limiter);
 
 // Initialize Deepgram with v3 syntax
 const deepgram = createClient(process.env.DEEPGRAM_API_KEY || 'your-api-key');
+
+// Initialize OpenAI
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || 'your-openai-api-key'
+});
 
 // Initialize SaaS managers
 const authManager = new AuthManager();
@@ -229,12 +236,51 @@ function handleAudioStream(request, socket, head, callSid) {
 
 async function generateAIResponse(userInput, conversationHistory, config) {
   try {
-    // Simple AI response logic - in production, integrate with your preferred LLM
-    const context = conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('\n');
+    // Build conversation context
+    const messages = [
+      {
+        role: 'system',
+        content: config.prompt || DEFAULT_AGENT_CONFIG.prompt
+      }
+    ];
     
-    // For demo purposes, using a simple response system
-    // In production, integrate with OpenAI, Anthropic, or other LLM providers
-    const responses = {
+    // Add recent conversation history
+    conversationHistory.slice(-10).forEach(msg => {
+      messages.push({
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.content
+      });
+    });
+    
+    // Add current user input
+    messages.push({
+      role: 'user',
+      content: userInput
+    });
+    
+    // Generate response using OpenAI
+    const response = await openai.chat.completions.create({
+      model: process.env.AI_MODEL || 'gpt-4-turbo-preview',
+      messages: messages,
+      max_tokens: parseInt(process.env.MAX_TOKENS) || 150,
+      temperature: parseFloat(process.env.TEMPERATURE) || 0.7,
+      stream: false
+    });
+    
+    const aiResponse = response.choices[0]?.message?.content;
+    
+    if (aiResponse) {
+      console.log(`AI Response: ${aiResponse}`);
+      return aiResponse.trim();
+    }
+    
+    return "I apologize, but I'm having trouble generating a response right now. Could you please try again?";
+    
+  } catch (error) {
+    console.error('Error generating AI response:', error);
+    
+    // Fallback to basic responses if OpenAI fails
+    const fallbackResponses = {
       greeting: "Hello! How can I assist you today?",
       help: "I'm here to help you with any questions or concerns you might have.",
       default: "I understand. Let me help you with that. Could you provide more details?"
@@ -243,15 +289,12 @@ async function generateAIResponse(userInput, conversationHistory, config) {
     const lowerInput = userInput.toLowerCase();
     
     if (lowerInput.includes('hello') || lowerInput.includes('hi')) {
-      return responses.greeting;
+      return fallbackResponses.greeting;
     } else if (lowerInput.includes('help') || lowerInput.includes('assist')) {
-      return responses.help;
+      return fallbackResponses.help;
     } else {
-      return responses.default;
+      return fallbackResponses.default;
     }
-  } catch (error) {
-    console.error('Error generating AI response:', error);
-    return "I apologize, but I'm having trouble processing your request right now. Could you please try again?";
   }
 }
 
@@ -366,13 +409,26 @@ app.get('/api', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-server.listen(PORT, () => {
-  console.log(`🚀 Deepgram AI Phone Platform (SaaS) running on port ${PORT}`);
-  console.log(`📞 Webhook URL: http://localhost:${PORT}/webhook/call`);
-  console.log(`🔊 Voice: Aura 2 (Odysseus)`);
-  console.log(`🔑 Admin Login: admin@deepgram-ai.com / Admin123!@#`);
-  console.log(`🏢 SaaS Features: User Management, Admin Dashboard, Reseller Portal`);
-});
+// Initialize database and start server
+async function startServer() {
+  try {
+    await initDatabase();
+    
+    server.listen(PORT, () => {
+      console.log(`🚀 Deepgram AI Phone Platform (SaaS) running on port ${PORT}`);
+      console.log(`📞 Webhook URL: http://localhost:${PORT}/webhook/call`);
+      console.log(`🔊 Voice: Aura 2 (Odysseus)`);
+      console.log(`🔑 Admin Login: admin@deepgram-ai.com / Admin123!@#`);
+      console.log(`🏢 SaaS Features: User Management, Admin Dashboard, Reseller Portal`);
+      console.log(`🗄️ Database: SQLite with user management enabled`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
 
 module.exports = app;
 

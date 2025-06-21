@@ -8,7 +8,9 @@
     "dev": "nodemon app.js",
     "test": "jest",
     "build": "npm install",
-    "deploy": "git push origin main"
+    "deploy": "git push origin main",
+    "setup-production": "node setup-production.js",
+    "setup": "node setup-production.js"
   },
   "keywords": [
     "ai",
@@ -43,7 +45,10 @@
     "nodemailer": "^6.9.7",
     "express-session": "^1.17.3",
     "passport": "^0.7.0",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "openai": "^4.20.1",
+    "sqlite3": "^5.1.6",
+    "sequelize": "^6.35.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
