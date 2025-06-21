@@ -1,8 +1,8 @@
-# 🚀 Deepgram AI Phone Platform
+# 🚀 Deepgram AI Phone Platform (SaaS)
 
 ## Enterprise-Grade AI Phone Call Solution with Aura 2 (Odysseus Voice)
 
-**Perfect for Startups & Resellers** - A complete AI-powered phone system using Deepgram's latest Aura 2 technology with the premium Odysseus voice model.
+**Complete SaaS Platform for Startups & Resellers** - A multi-tenant AI-powered phone system using Deepgram's latest Aura 2 technology with premium Odysseus voice, featuring user management, admin dashboard, and reseller capabilities.
 
 ### ✨ Features
 

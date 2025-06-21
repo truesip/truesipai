@@ -7,7 +7,16 @@ const rateLimit = require('express-rate-limit');
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
 const { Deepgram } = require('@deepgram/sdk');
 const WebSocket = require('ws');
+const path = require('path');
 require('dotenv').config();
+
+// Import SaaS components
+const AuthManager = require('./src/auth/AuthManager');
+const AgentManager = require('./src/agents/AgentManager');
+const ResellerManager = require('./src/reseller/ResellerManager');
+const { createAuthRoutes } = require('./src/routes/auth');
+const { createAdminRoutes } = require('./src/routes/admin');
+const { authenticateToken, validateApiKey, requireActiveSubscription } = require('./src/middleware/auth');
 
 const app = express();
 const server = createServer(app);
@@ -33,6 +42,11 @@ app.use('/api/', limiter);
 
 // Initialize Deepgram
 const deepgram = new Deepgram(process.env.DEEPGRAM_API_KEY);
+
+// Initialize SaaS managers
+const authManager = new AuthManager();
+const agentManager = new AgentManager();
+const resellerManager = new ResellerManager();
 
 // Store active calls
 const activeCalls = new Map();
@@ -287,12 +301,47 @@ app.post('/api/configure', (req, res) => {
   }
 });
 
+// Mount SaaS routes
+app.use('/auth', createAuthRoutes(authManager));
+app.use('/admin', createAdminRoutes(authManager, agentManager, resellerManager));
+
+// Serve static files for dashboard
+app.use('/dashboard', express.static(path.join(__dirname, 'public/dashboard')));
+app.use('/admin-panel', express.static(path.join(__dirname, 'public/admin')));
+
+// Protected API routes
+app.use('/api/agents', authenticateToken(authManager), requireActiveSubscription());
+app.use('/api/reseller', authenticateToken(authManager));
+
+// Default route
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Welcome to Deepgram AI Phone Platform',
+    version: '1.0.0',
+    features: [
+      'AI Voice Agents with Aura 2 (Odysseus)',
+      'VOIP Call Handling',
+      'SaaS Multi-tenant Architecture',
+      'Admin Dashboard',
+      'Reseller Management'
+    ],
+    endpoints: {
+      health: '/health',
+      auth: '/auth',
+      admin: '/admin',
+      webhook: '/webhook/call'
+    }
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
-  console.log(`🚀 Deepgram AI Phone Platform running on port ${PORT}`);
+  console.log(`🚀 Deepgram AI Phone Platform (SaaS) running on port ${PORT}`);
   console.log(`📞 Webhook URL: http://localhost:${PORT}/webhook/call`);
   console.log(`🔊 Voice: Aura 2 (Odysseus)`);
+  console.log(`🔑 Admin Login: admin@deepgram-ai.com / admin123!@#`);
+  console.log(`🏢 SaaS Features: User Management, Admin Dashboard, Reseller Portal`);
 });
 
 module.exports = app;
