@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - Deepgram AI Phone Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            background: #f8fafc;
+            color: #2d3748;
+        }
+        
+        .header {
+            background: #667eea;
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .content {
+            max-width: 1000px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            background: #f8fafc;
+            padding: 30px;
+            border-right: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            height: fit-content;
+        }
+        
+        .main-content {
+            padding: 40px;
+        }
+        
+        .docs-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+        }
+        
+        .nav-link {
+            display: block;
+            padding: 8px 0;
+            color: #4a5568;
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            padding-left: 15px;
+        }
+        
+        .nav-link:hover,
+        .nav-link.active {
+            color: #667eea;
+            border-left-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .section {
+            margin-bottom: 50px;
+        }
+        
+        .section h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .section h3 {
+            color: #4a5568;
+            margin: 30px 0 15px 0;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .code-header {
+            background: #4a5568;
+            color: white;
+            padding: 10px 20px;
+            margin: -20px -20px 20px -20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .endpoint {
+            background: #f8faff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .method-post {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .method-get {
+            background: #4299e1;
+            color: white;
+        }
+        
+        .method-put {
+            background: #ed8936;
+            color: white;
+        }
+        
+        .method-delete {
+            background: #f56565;
+            color: white;
+        }
+        
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .param-table th,
+        .param-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .param-table th {
+            background: #f8fafc;
+            font-weight: 600;
+        }
+        
+        .required {
+            color: #f56565;
+            font-weight: bold;
+        }
+        
+        .optional {
+            color: #718096;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 5px 10px 0;
+        }
+        
+        .btn:hover {
+            background: #5a67d8;
+        }
+        
+        .integration-steps {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin: 30px 0;
+        }
+        
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .step {
+            text-align: center;
+        }
+        
+        .step-number {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .docs-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>🤖 API Documentation</h1>
+            <p>Integrate AI phone agents into your applications</p>
+        </div>
+    </div>
+    
+    <div class="content">
+        <div class="docs-layout">
+            <div class="sidebar">
+                <h3>Navigation</h3>
+                <a href="#overview" class="nav-link active">Overview</a>
+                <a href="#quick-start" class="nav-link">Quick Start</a>
+                <a href="#authentication" class="nav-link">Authentication</a>
+                <a href="#phone-integration" class="nav-link">Phone Integration</a>
+                <a href="#api-endpoints" class="nav-link">API Endpoints</a>
+                <a href="#webhooks" class="nav-link">Webhooks</a>
+                <a href="#examples" class="nav-link">Examples</a>
+                <a href="#sdks" class="nav-link">SDKs</a>
+            </div>
+            
+            <div class="main-content">
+                <div id="overview" class="section">
+                    <h2>🚀 Overview</h2>
+                    <p>The Deepgram AI Phone Platform provides enterprise-grade voice AI capabilities through simple APIs. Integrate natural-sounding AI phone agents powered by Deepgram's Aura 2 (Odysseus) voice technology.</p>
+                    
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li><strong>Aura 2 (Odysseus Voice)</strong> - Most natural AI voice available</li>
+                        <li><strong>Real-time Processing</strong> - Instant speech-to-text and response</li>
+                        <li><strong>Custom AI Agents</strong> - Configurable personalities and responses</li>
+                        <li><strong>VOIP Integration</strong> - Works with Twilio and other providers</li>
+                        <li><strong>Analytics & Insights</strong> - Comprehensive call analytics</li>
+                    </ul>
+                </div>
+                
+                <div class="integration-steps">
+                    <h2>🎯 How Users Use AI Services</h2>
+                    <p>There are three main ways users can integrate and use the AI phone services:</p>
+                    
+                    <div class="steps-grid">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <h3>Direct Phone Calls</h3>
+                            <p>Get a Twilio number, configure webhook, customers call directly</p>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <h3>API Integration</h3>
+                            <p>Integrate AI agents into existing applications via REST API</p>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <h3>WebSocket Streaming</h3>
+                            <p>Real-time audio streaming for custom voice applications</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="quick-start" class="section">
+                    <h2>⚡ Quick Start</h2>
+                    
+                    <h3>Method 1: Direct Phone Integration (Recommended)</h3>
+                    
+                    <div class="code-block">
+                        <div class="code-header">Step 1: Get Your API Credentials</div>
+                        <pre>// From your dashboard at /dashboard
+API_KEY: "dk_your_api_key_here"
+WEBHOOK_URL: "https://your-app-url.ondigitalocean.app/webhook/call"</pre>
+                    </div>
+                    
+                    <div class="code-block">
+                        <div class="code-header">Step 2: Configure Twilio Webhook</div>
+                        <pre>// Twilio Console → Phone Numbers → Active Numbers
+Webhook URL: https://your-app-url.ondigitalocean.app/webhook/call
+HTTP Method: POST
+Events: Incoming Voice Calls</pre>
+                    </div>
+                    
+                    <div class="code-block">
+                        <div class="code-header">Step 3: Test Your Setup</div>
+                        <pre>// Call your Twilio number
+// AI agent will answer with Aura 2 (Odysseus) voice
+// Real-time conversation with natural responses</pre>
+                    </div>
+                    
+                    <h3>Method 2: API Integration</h3>
+                    
+                    <div class="code-block">
+                        <div class="code-header">JavaScript Example</div>
+                        <pre>// Create an AI agent
+const response = await fetch('/api/agents', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer your_jwt_token',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    name: 'Customer Service Agent',
+    voice: 'aura-odysseus-en',
+    greeting: 'Hello! How can I help you today?',
+    prompt: 'You are a helpful customer service representative...'
+  })
+});
+
+const agent = await response.json();
+console.log('Agent created:', agent);</pre>
+                    </div>
+                </div>
+                
+                <div id="authentication" class="section">
+                    <h2>🔐 Authentication</h2>
+                    <p>The API supports two authentication methods:</p>
+                    
+                    <h3>JWT Token Authentication</h3>
+                    <div class="endpoint">
+                        <span class="method method-post">POST</span> <code>/auth/login</code>
+                        
+                        <table class="param-table">
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                            <tr>
+                                <td>email</td>
+                                <td>string</td>
+                                <td class="required">Required</td>
+                                <td>User email address</td>
+                            </tr>
+                            <tr>
+                                <td>password</td>
+                                <td>string</td>
+                                <td class="required">Required</td>
+                                <td>User password</td>
+                            </tr>
+                        </table>
+                        
+                        <div class="code-block">
+                            <div class="code-header">cURL Example</div>
+                            <pre>curl -X POST https://your-app-url.ondigitalocean.app/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@company.com",
+    "password": "SecurePass123!"
+  }'</pre>
+                        </div>
+                    </div>
+                    
+                    <h3>API Key Authentication</h3>
+                    <div class="code-block">
+                        <div class="code-header">Using API Key in Headers</div>
+                        <pre>curl -X GET https://your-app-url.ondigitalocean.app/api/agents \
+  -H "X-API-Key: dk_your_api_key_here"</pre>
+                    </div>
+                </div>
+                
+                <div id="phone-integration" class="section">
+                    <h2>📞 Phone Integration Guide</h2>
+                    
+                    <h3>1. Twilio Setup</h3>
+                    <ol>
+                        <li><strong>Create Twilio Account</strong> at https://twilio.com</li>
+                        <li><strong>Purchase Phone Number</strong> from Twilio Console</li>
+                        <li><strong>Configure Webhook</strong>:</li>
+                    </ol>
+                    
+                    <div class="code-block">
+                        <div class="code-header">Twilio Configuration</div>
+                        <pre>Voice Webhook URL: https://your-app-url.ondigitalocean.app/webhook/call
+HTTP Method: POST
+Events: All incoming voice calls</pre>
+                    </div>
+                    
+                    <h3>2. Call Flow</h3>
+                    <div class="code-block">
+                        <div class="code-header">How It Works</div>
+                        <pre>1. Customer calls Twilio number
+2. Twilio sends webhook to your platform
+3. Platform responds with TwiML + WebSocket connection
+4. Real-time audio streams to Deepgram for STT
+5. AI processes conversation and responds
+6. Deepgram TTS converts response to speech
+7. Customer hears natural AI voice (Aura 2 Odysseus)</pre>
+                    </div>
+                    
+                    <h3>3. Custom Agent Configuration</h3>
+                    <div class="endpoint">
+                        <span class="method method-post">POST</span> <code>/api/configure</code>
+                        
+                        <div class="code-block">
+                            <div class="code-header">Configure Agent for Specific Call</div>
+                            <pre>{
+  "callSid": "CA1234567890abcdef",
+  "config": {
+    "voice": "aura-odysseus-en",
+    "greeting": "Welcome to Acme Corp! How can I help?",
+    "prompt": "You are a sales representative for Acme Corp...",
+    "maxCallDuration": 1200
+  }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="api-endpoints" class="section">
+                    <h2>🔗 API Endpoints</h2>
+                    
+                    <h3>Agent Management</h3>
+                    
+                    <div class="endpoint">
+                        <span class="method method-get">GET</span> <code>/api/agents</code>
+                        <p>List all AI agents for authenticated user</p>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <span class="method method-post">POST</span> <code>/api/agents</code>
+                        <p>Create a new AI agent</p>
+                        
+                        <div class="code-block">
+                            <div class="code-header">Request Body</div>
+                            <pre>{
+  "name": "Customer Service Agent",
+  "voice": "aura-odysseus-en",
+  "greeting": "Hello! How can I help you today?",
+  "prompt": "You are a professional customer service representative...",
+  "maxCallDuration": 600
+}</pre>
+                        </div>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <span class="method method-put">PUT</span> <code>/api/agents/:id</code>
+                        <p>Update an existing AI agent</p>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <span class="method method-delete">DELETE</span> <code>/api/agents/:id</code>
+                        <p>Delete an AI agent</p>
+                    </div>
+                    
+                    <h3>Call Management</h3>
+                    
+                    <div class="endpoint">
+                        <span class="method method-get">GET</span> <code>/api/calls</code>
+                        <p>Get list of all calls</p>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <span class="method method-get">GET</span> <code>/api/calls/:callSid</code>
+                        <p>Get details of specific call</p>
+                    </div>
+                </div>
+                
+                <div id="webhooks" class="section">
+                    <h2>🔔 Webhooks</h2>
+                    
+                    <h3>Incoming Call Webhook</h3>
+                    <div class="endpoint">
+                        <span class="method method-post">POST</span> <code>/webhook/call</code>
+                        <p>Handles incoming calls from Twilio</p>
+                        
+                        <table class="param-table">
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Description</th>
+                            </tr>
+                            <tr>
+                                <td>CallSid</td>
+                                <td>Unique identifier for the call</td>
+                            </tr>
+                            <tr>
+                                <td>From</td>
+                                <td>Caller's phone number</td>
+                            </tr>
+                            <tr>
+                                <td>To</td>
+                                <td>Called phone number</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div id="examples" class="section">
+                    <h2>💡 Integration Examples</h2>
+                    
+                    <h3>E-commerce Customer Service</h3>
+                    <div class="code-block">
+                        <div class="code-header">Agent Configuration</div>
+                        <pre>{
+  "name": "E-commerce Support",
+  "voice": "aura-odysseus-en",
+  "greeting": "Thank you for calling ShopCorp! I'm here to help with orders, returns, and product questions.",
+  "prompt": "You are a customer service agent for an e-commerce company. Help with:\n- Order status and tracking\n- Product information\n- Returns and exchanges\n- General shopping questions\nBe helpful and friendly. If you need to transfer to a human, say so."
+}</pre>
+                    </div>
+                    
+                    <h3>Medical Appointment Booking</h3>
+                    <div class="code-block">
+                        <div class="code-header">Agent Configuration</div>
+                        <pre>{
+  "name": "Medical Scheduler",
+  "voice": "aura-odysseus-en",
+  "greeting": "Hello! You've reached HealthCare Clinic. I can help schedule appointments, answer questions about our services, and provide general information.",
+  "prompt": "You are a medical appointment scheduler. You can:\n- Check appointment availability\n- Schedule new appointments\n- Answer questions about services\n- Provide clinic hours and location\nAlways be professional and empathetic. Protect patient privacy."
+}</pre>
+                    </div>
+                    
+                    <h3>Real Estate Lead Qualification</h3>
+                    <div class="code-block">
+                        <div class="code-header">Agent Configuration</div>
+                        <pre>{
+  "name": "Real Estate Assistant",
+  "voice": "aura-odysseus-en",
+  "greeting": "Hi! Thanks for your interest in our properties. I'm here to help you find your perfect home.",
+  "prompt": "You are a real estate assistant. Qualify leads by asking about:\n- Budget range\n- Preferred location\n- Home size requirements\n- Timeline for buying\n- Financing pre-approval status\nBe friendly and consultative, not pushy."
+}</pre>
+                    </div>
+                </div>
+                
+                <div id="sdks" class="section">
+                    <h2>📚 SDKs & Libraries</h2>
+                    
+                    <h3>JavaScript/Node.js</h3>
+                    <div class="code-block">
+                        <div class="code-header">Installation</div>
+                        <pre>npm install @deepgram-ai-phone/sdk</pre>
+                    </div>
+                    
+                    <div class="code-block">
+                        <div class="code-header">Usage</div>
+                        <pre>const { DeepgramAIPhone } = require('@deepgram-ai-phone/sdk');
+
+const client = new DeepgramAIPhone({
+  apiKey: 'your_api_key',
+  baseUrl: 'https://your-app-url.ondigitalocean.app'
+});
+
+// Create an agent
+const agent = await client.agents.create({
+  name: 'Support Agent',
+  voice: 'aura-odysseus-en',
+  greeting: 'Hello! How can I help?'
+});
+
+// List calls
+const calls = await client.calls.list();</pre>
+                    </div>
+                    
+                    <h3>Python</h3>
+                    <div class="code-block">
+                        <div class="code-header">Installation</div>
+                        <pre>pip install deepgram-ai-phone</pre>
+                    </div>
+                    
+                    <div class="code-block">
+                        <div class="code-header">Usage</div>
+                        <pre>from deepgram_ai_phone import DeepgramAIPhone
+
+client = DeepgramAIPhone(
+    api_key='your_api_key',
+    base_url='https://your-app-url.ondigitalocean.app'
+)
+
+# Create an agent
+agent = client.agents.create(
+    name='Support Agent',
+    voice='aura-odysseus-en',
+    greeting='Hello! How can I help?'
+)
+
+# List calls
+calls = client.calls.list()</pre>
+                    </div>
+                    
+                    <div class="btn">
+                        <a href="/dashboard" style="color: white; text-decoration: none;">Get Started Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

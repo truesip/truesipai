@@ -328,6 +328,7 @@ app.use('/admin', createAdminRoutes(authManager, agentManager, resellerManager))
 // Serve static files for dashboard
 app.use('/dashboard', express.static(path.join(__dirname, 'public/dashboard')));
 app.use('/admin-panel', express.static(path.join(__dirname, 'public/admin')));
+app.use('/docs', express.static(path.join(__dirname, 'public/docs')));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Protected API routes
