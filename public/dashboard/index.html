@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Deepgram AI Phone Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #2d3748;
+        }
+        
+        .header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .welcome {
+            margin-bottom: 40px;
+        }
+        
+        .welcome h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+        
+        .welcome p {
+            font-size: 1.1rem;
+            color: #718096;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #718096;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4a5568;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .action-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .getting-started {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 40px;
+            margin-top: 40px;
+        }
+        
+        .getting-started h2 {
+            margin-bottom: 20px;
+        }
+        
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .step {
+            text-align: center;
+        }
+        
+        .step-number {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-weight: bold;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .login-prompt {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .login-prompt h2 {
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+        
+        .login-prompt p {
+            margin-bottom: 30px;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">🤖 Deepgram AI Phone</div>
+            <div class="user-menu">
+                <span id="userEmail"></span>
+                <button onclick="logout()" class="btn btn-secondary">Logout</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Login Prompt (shown when not authenticated) -->
+    <div id="loginPrompt" class="login-prompt hidden">
+        <h2>Welcome to Deepgram AI Phone Platform</h2>
+        <p>Please sign in to access your dashboard</p>
+        <a href="/" class="btn">Go to Homepage</a>
+        <a href="/admin-panel" class="btn btn-secondary">Admin Login</a>
+    </div>
+    
+    <!-- Main Dashboard (shown when authenticated) -->
+    <div id="mainDashboard" class="hidden">
+        <div class="container">
+            <div class="welcome">
+                <h1>Welcome back! 👋</h1>
+                <p>Manage your AI phone agents and monitor your call analytics</p>
+            </div>
+            
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h3>📞 Total Calls</h3>
+                    <div class="stat-number" id="totalCalls">0</div>
+                    <div class="stat-label">This month</div>
+                </div>
+                
+                <div class="card">
+                    <h3>⏱️ Call Minutes</h3>
+                    <div class="stat-number" id="totalMinutes">0</div>
+                    <div class="stat-label">Minutes used</div>
+                </div>
+                
+                <div class="card">
+                    <h3>🤖 Active Agents</h3>
+                    <div class="stat-number" id="activeAgents">0</div>
+                    <div class="stat-label">AI agents ready</div>
+                </div>
+                
+                <div class="card">
+                    <h3>💰 Current Plan</h3>
+                    <div class="stat-number" id="currentPlan">Starter</div>
+                    <div class="stat-label">Subscription tier</div>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <div class="action-card">
+                    <div class="action-icon">🎨</div>
+                    <h3>Create AI Agent</h3>
+                    <p>Set up a new AI phone agent with custom personality and responses</p>
+                    <button class="btn" onclick="createAgent()">Create Agent</button>
+                </div>
+                
+                <div class="action-card">
+                    <div class="action-icon">📊</div>
+                    <h3>View Analytics</h3>
+                    <p>Monitor call performance, conversation insights, and usage metrics</p>
+                    <button class="btn" onclick="viewAnalytics()">View Analytics</button>
+                </div>
+                
+                <div class="action-card">
+                    <div class="action-icon">⚙️</div>
+                    <h3>Settings</h3>
+                    <p>Configure your account, billing, and notification preferences</p>
+                    <button class="btn" onclick="openSettings()">Open Settings</button>
+                </div>
+                
+                <div class="action-card">
+                    <div class="action-icon">📚</div>
+                    <h3>Documentation</h3>
+                    <p>Learn how to integrate and optimize your AI phone system</p>
+                    <button class="btn" onclick="openDocs()">View Docs</button>
+                </div>
+            </div>
+            
+            <div class="getting-started">
+                <h2>🚀 Getting Started</h2>
+                <p>Follow these steps to set up your first AI phone agent</p>
+                
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Configure Your Agent</h3>
+                        <p>Choose a voice, create greetings, and set up conversation flows</p>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>Get Your Phone Number</h3>
+                        <p>Purchase a Twilio number and configure the webhook settings</p>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>Test Your Setup</h3>
+                        <p>Make a test call to ensure everything is working perfectly</p>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <h3>Go Live</h3>
+                        <p>Share your AI phone number with customers and start handling calls</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let authToken = localStorage.getItem('userToken');
+        let currentUser = null;
+        
+        // Check authentication on page load
+        window.addEventListener('DOMContentLoaded', async function() {
+            if (authToken) {
+                await checkAuth();
+            } else {
+                showLoginPrompt();
+            }
+        });
+        
+        async function checkAuth() {
+            try {
+                const response = await fetch('/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data.user;
+                    showDashboard();
+                    loadDashboardData();
+                } else {
+                    // Token is invalid
+                    localStorage.removeItem('userToken');
+                    showLoginPrompt();
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                showLoginPrompt();
+            }
+        }
+        
+        function showLoginPrompt() {
+            document.getElementById('loginPrompt').classList.remove('hidden');
+            document.getElementById('mainDashboard').classList.add('hidden');
+        }
+        
+        function showDashboard() {
+            document.getElementById('loginPrompt').classList.add('hidden');
+            document.getElementById('mainDashboard').classList.remove('hidden');
+            
+            if (currentUser) {
+                document.getElementById('userEmail').textContent = currentUser.email;
+            }
+        }
+        
+        async function loadDashboardData() {
+            // This would load real data from your API
+            // For now, showing demo data
+            document.getElementById('totalCalls').textContent = '0';
+            document.getElementById('totalMinutes').textContent = '0';
+            document.getElementById('activeAgents').textContent = '0';
+            document.getElementById('currentPlan').textContent = currentUser?.subscription?.tier || 'Starter';
+        }
+        
+        function logout() {
+            localStorage.removeItem('userToken');
+            authToken = null;
+            currentUser = null;
+            showLoginPrompt();
+        }
+        
+        // Quick action functions
+        function createAgent() {
+            alert('🎨 AI Agent Creator coming soon! You\'ll be able to create custom AI agents with different personalities, voices, and conversation flows.');
+        }
+        
+        function viewAnalytics() {
+            alert('📊 Analytics Dashboard coming soon! Track call performance, conversation insights, customer satisfaction, and usage metrics.');
+        }
+        
+        function openSettings() {
+            alert('⚙️ Settings Panel coming soon! Configure your account, billing preferences, and notification settings.');
+        }
+        
+        function openDocs() {
+            alert('📚 Documentation coming soon! Complete guides for integration, API usage, and best practices.');
+        }
+        
+        // Check URL for token (from successful signup)
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenFromUrl = urlParams.get('token');
+        if (tokenFromUrl) {
+            localStorage.setItem('userToken', tokenFromUrl);
+            authToken = tokenFromUrl;
+            // Remove token from URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            checkAuth();
+        }
+    </script>
+</body>
+</html>
+

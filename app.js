@@ -328,15 +328,21 @@ app.use('/admin', createAdminRoutes(authManager, agentManager, resellerManager))
 // Serve static files for dashboard
 app.use('/dashboard', express.static(path.join(__dirname, 'public/dashboard')));
 app.use('/admin-panel', express.static(path.join(__dirname, 'public/admin')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Protected API routes
 app.use('/api/agents', authenticateToken(authManager), requireActiveSubscription());
 app.use('/api/reseller', authenticateToken(authManager));
 
-// Default route
+// Serve the main landing page
 app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/index.html'));
+});
+
+// API info endpoint
+app.get('/api', (req, res) => {
   res.json({
-    message: 'Welcome to Deepgram AI Phone Platform',
+    message: 'Deepgram AI Phone Platform API',
     version: '1.0.0',
     features: [
       'AI Voice Agents with Aura 2 (Odysseus)',
@@ -349,7 +355,9 @@ app.get('/', (req, res) => {
       health: '/health',
       auth: '/auth',
       admin: '/admin',
-      webhook: '/webhook/call'
+      webhook: '/webhook/call',
+      signup: '/auth/signup',
+      login: '/auth/login'
     }
   });
 });
