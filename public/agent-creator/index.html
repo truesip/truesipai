@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent Creator - Deepgram AI Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .creator-form {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .form-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .voice-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .voice-option {
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .voice-option:hover {
+            border-color: #3498db;
+            background: #f0f8ff;
+        }
+
+        .voice-option.selected {
+            border-color: #3498db;
+            background: #3498db;
+            color: white;
+        }
+
+        .personality-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .personality-tag {
+            padding: 8px 16px;
+            background: #e9ecef;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .personality-tag:hover {
+            background: #3498db;
+            color: white;
+        }
+
+        .personality-tag.selected {
+            background: #3498db;
+            color: white;
+        }
+
+        .preview-section {
+            grid-column: 1 / -1;
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .preview-section h3 {
+            color: #ecf0f1;
+            margin-bottom: 20px;
+        }
+
+        .agent-preview {
+            background: #34495e;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 150px;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn-test {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-test:hover {
+            background: #c0392b;
+        }
+
+        .success-message {
+            background: #2ecc71;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .creator-form {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI Agent Creator</h1>
+            <p>Design custom AI agents with unique personalities, voices, and conversation flows</p>
+        </div>
+
+        <form class="creator-form" id="agentForm">
+            <!-- Basic Information -->
+            <div class="form-section">
+                <h3>📋 Basic Information</h3>
+                
+                <div class="form-group">
+                    <label for="agentName">Agent Name</label>
+                    <input type="text" id="agentName" name="agentName" placeholder="e.g., Customer Service Bot" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="agentDescription">Description</label>
+                    <textarea id="agentDescription" name="agentDescription" placeholder="Describe what this agent does and its purpose..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="agentDepartment">Department/Use Case</label>
+                    <select id="agentDepartment" name="agentDepartment">
+                        <option value="customer-service">Customer Service</option>
+                        <option value="sales">Sales & Lead Qualification</option>
+                        <option value="support">Technical Support</option>
+                        <option value="appointments">Appointment Booking</option>
+                        <option value="information">Information Services</option>
+                        <option value="reception">Virtual Reception</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Voice & Personality -->
+            <div class="form-section">
+                <h3>🎭 Voice & Personality</h3>
+                
+                <div class="form-group">
+                    <label>Voice Selection</label>
+                    <div class="voice-options">
+                        <div class="voice-option" data-voice="aura-odysseus-en">
+                            <strong>Odysseus</strong><br>
+                            <small>Professional, Clear</small>
+                        </div>
+                        <div class="voice-option" data-voice="aura-luna-en">
+                            <strong>Luna</strong><br>
+                            <small>Warm, Friendly</small>
+                        </div>
+                        <div class="voice-option" data-voice="aura-stella-en">
+                            <strong>Stella</strong><br>
+                            <small>Energetic, Upbeat</small>
+                        </div>
+                        <div class="voice-option" data-voice="aura-athena-en">
+                            <strong>Athena</strong><br>
+                            <small>Authoritative, Confident</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Personality Traits</label>
+                    <div class="personality-tags">
+                        <button type="button" class="personality-tag" data-trait="professional">Professional</button>
+                        <button type="button" class="personality-tag" data-trait="friendly">Friendly</button>
+                        <button type="button" class="personality-tag" data-trait="helpful">Helpful</button>
+                        <button type="button" class="personality-tag" data-trait="patient">Patient</button>
+                        <button type="button" class="personality-tag" data-trait="enthusiastic">Enthusiastic</button>
+                        <button type="button" class="personality-tag" data-trait="calm">Calm</button>
+                        <button type="button" class="personality-tag" data-trait="empathetic">Empathetic</button>
+                        <button type="button" class="personality-tag" data-trait="knowledgeable">Knowledgeable</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conversation Settings -->
+            <div class="form-section">
+                <h3>💬 Conversation Settings</h3>
+                
+                <div class="form-group">
+                    <label for="greeting">Greeting Message</label>
+                    <textarea id="greeting" name="greeting" placeholder="Hello! Thank you for calling [Company]. How can I help you today?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="maxDuration">Max Call Duration (minutes)</label>
+                    <input type="number" id="maxDuration" name="maxDuration" value="10" min="1" max="60">
+                </div>
+
+                <div class="form-group">
+                    <label for="responseStyle">Response Style</label>
+                    <select id="responseStyle" name="responseStyle">
+                        <option value="concise">Concise & Direct</option>
+                        <option value="detailed">Detailed & Thorough</option>
+                        <option value="conversational">Conversational & Casual</option>
+                        <option value="formal">Formal & Professional</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- AI Behavior -->
+            <div class="form-section">
+                <h3>🧠 AI Behavior</h3>
+                
+                <div class="form-group">
+                    <label for="systemPrompt">System Prompt</label>
+                    <textarea id="systemPrompt" name="systemPrompt" placeholder="You are a helpful AI assistant for [Company]. You should..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="knowledgeBase">Knowledge Base</label>
+                    <textarea id="knowledgeBase" name="knowledgeBase" placeholder="Key information this agent should know about your business, products, services, policies, etc."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="escalationRules">Escalation Rules</label>
+                    <textarea id="escalationRules" name="escalationRules" placeholder="When should this agent transfer to a human? e.g., complaints, technical issues, billing disputes..."></textarea>
+                </div>
+            </div>
+
+            <!-- Preview Section -->
+            <div class="preview-section">
+                <h3>👁️ Agent Preview</h3>
+                <div class="agent-preview" id="agentPreview">
+                    <p><strong>Agent:</strong> <span id="previewName">New Agent</span></p>
+                    <p><strong>Voice:</strong> <span id="previewVoice">Select a voice</span></p>
+                    <p><strong>Personality:</strong> <span id="previewPersonality">Select personality traits</span></p>
+                    <p><strong>Greeting:</strong> <span id="previewGreeting">Enter a greeting message</span></p>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button type="button" class="btn btn-test" onclick="testAgent()">🎤 Test Agent</button>
+                <button type="button" class="btn btn-secondary" onclick="saveAsDraft()">💾 Save Draft</button>
+                <button type="submit" class="btn btn-primary">🚀 Create Agent</button>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                ✅ AI Agent created successfully! You can now use it for phone calls.
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Voice selection
+        document.querySelectorAll('.voice-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.voice-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                updatePreview();
+            });
+        });
+
+        // Personality trait selection
+        document.querySelectorAll('.personality-tag').forEach(tag => {
+            tag.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                updatePreview();
+            });
+        });
+
+        // Update preview in real-time
+        document.querySelectorAll('input, textarea, select').forEach(element => {
+            element.addEventListener('input', updatePreview);
+        });
+
+        function updatePreview() {
+            const name = document.getElementById('agentName').value || 'New Agent';
+            const selectedVoice = document.querySelector('.voice-option.selected');
+            const voiceText = selectedVoice ? selectedVoice.querySelector('strong').textContent : 'Select a voice';
+            const personalities = Array.from(document.querySelectorAll('.personality-tag.selected'))
+                .map(tag => tag.textContent).join(', ') || 'Select personality traits';
+            const greeting = document.getElementById('greeting').value || 'Enter a greeting message';
+
+            document.getElementById('previewName').textContent = name;
+            document.getElementById('previewVoice').textContent = voiceText;
+            document.getElementById('previewPersonality').textContent = personalities;
+            document.getElementById('previewGreeting').textContent = greeting;
+        }
+
+        // Form submission
+        document.getElementById('agentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const agentData = Object.fromEntries(formData.entries());
+            
+            // Add selected voice
+            const selectedVoice = document.querySelector('.voice-option.selected');
+            if (selectedVoice) {
+                agentData.voice = selectedVoice.dataset.voice;
+            }
+            
+            // Add selected personality traits
+            agentData.personalities = Array.from(document.querySelectorAll('.personality-tag.selected'))
+                .map(tag => tag.dataset.trait);
+            
+            try {
+                const response = await fetch('/api/agents', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    },
+                    body: JSON.stringify(agentData)
+                });
+                
+                if (response.ok) {
+                    document.getElementById('successMessage').style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 2000);
+                } else {
+                    alert('Error creating agent. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error creating agent. Please try again.');
+            }
+        });
+
+        function testAgent() {
+            alert('🎤 Test feature coming soon! You\'ll be able to make a test call to preview your agent.');
+        }
+
+        function saveAsDraft() {
+            const agentData = {
+                name: document.getElementById('agentName').value,
+                greeting: document.getElementById('greeting').value,
+                voice: document.querySelector('.voice-option.selected')?.dataset.voice,
+                personalities: Array.from(document.querySelectorAll('.personality-tag.selected'))
+                    .map(tag => tag.dataset.trait)
+            };
+            
+            localStorage.setItem('agentDraft', JSON.stringify(agentData));
+            alert('💾 Agent saved as draft!');
+        }
+
+        // Load draft on page load
+        window.addEventListener('load', function() {
+            const draft = localStorage.getItem('agentDraft');
+            if (draft) {
+                const agentData = JSON.parse(draft);
+                if (agentData.name) document.getElementById('agentName').value = agentData.name;
+                if (agentData.greeting) document.getElementById('greeting').value = agentData.greeting;
+                if (agentData.voice) {
+                    document.querySelector(`[data-voice="${agentData.voice}"]`)?.classList.add('selected');
+                }
+                if (agentData.personalities) {
+                    agentData.personalities.forEach(trait => {
+                        document.querySelector(`[data-trait="${trait}"]`)?.classList.add('selected');
+                    });
+                }
+                updatePreview();
+            }
+        });
+
+        // Initialize preview
+        updatePreview();
+    </script>
+</body>
+</html>
+

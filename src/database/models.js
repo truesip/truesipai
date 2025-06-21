@@ -169,6 +169,10 @@ const AIAgent = sequelize.define('AIAgent', {
   isActive: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
+  },
+  metadata: {
+    type: DataTypes.JSON,
+    defaultValue: {}
   }
 }, {
   timestamps: true

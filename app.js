@@ -368,11 +368,16 @@ app.post('/api/configure', (req, res) => {
 app.use('/auth', createAuthRoutes(authManager));
 app.use('/admin', createAdminRoutes(authManager, agentManager, resellerManager));
 
+// Mount Agent routes
+const agentRoutes = require('./src/routes/agents');
+app.use('/api/agents', authenticateToken(authManager), requireActiveSubscription(), agentRoutes);
+
 // Serve static files for dashboard
 app.use('/dashboard', express.static(path.join(__dirname, 'public/dashboard')));
 app.use('/admin-panel', express.static(path.join(__dirname, 'public/admin')));
 app.use('/login', express.static(path.join(__dirname, 'public/login')));
 app.use('/docs', express.static(path.join(__dirname, 'public/docs')));
+app.use('/agent-creator', express.static(path.join(__dirname, 'public/agent-creator')));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Protected API routes
