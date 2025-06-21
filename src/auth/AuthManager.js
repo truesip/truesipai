@@ -90,19 +90,33 @@ class AuthManager extends EventEmitter {
   }
 
   async authenticateUser(email, password) {
-    const user = await User.findOne({ where: { email: email.toLowerCase() } });
-    
-    if (!user) {
-      throw new Error('Invalid credentials');
-    }
+    try {
+      console.log(`Authentication attempt for email: ${email}`);
+      
+      const user = await User.findOne({ where: { email: email.toLowerCase() } });
+      
+      if (!user) {
+        console.log(`User not found for email: ${email}`);
+        throw new Error('Invalid credentials');
+      }
 
-    if (!user.isActive) {
-      throw new Error('Account is inactive');
-    }
+      console.log(`User found: ${user.email}, isActive: ${user.isActive}`);
+      
+      if (!user.isActive) {
+        console.log(`Account inactive for user: ${user.email}`);
+        throw new Error('Account is inactive');
+      }
 
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) {
-      throw new Error('Invalid credentials');
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      console.log(`Password validation result for ${user.email}: ${isValidPassword}`);
+      
+      if (!isValidPassword) {
+        console.log(`Invalid password for user: ${user.email}`);
+        throw new Error('Invalid credentials');
+      }
+    } catch (error) {
+      console.error(`Authentication error for ${email}:`, error.message);
+      throw error;
     }
 
     // Generate session token

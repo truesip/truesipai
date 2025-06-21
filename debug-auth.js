@@ -1,6 +1,7 @@
 const AuthManager = require('./src/auth/AuthManager');
 const { initDatabase, User } = require('./src/database/models');
 const bcrypt = require('bcryptjs');
+require('dotenv').config();
 
 async function debugAuthentication() {
   console.log('🔍 Starting authentication debug...');

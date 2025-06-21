@@ -10,13 +10,19 @@ function createAuthRoutes(authManager) {
   const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 5, // Limit each IP to 5 requests per windowMs
-    message: { error: 'Too many authentication attempts, please try again later.' }
+    message: { error: 'Too many authentication attempts, please try again later.' },
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    trustProxy: true // Trust proxy headers for correct IP detection
   });
 
   const signupLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
     max: 3, // Limit each IP to 3 signups per hour
-    message: { error: 'Too many signup attempts, please try again later.' }
+    message: { error: 'Too many signup attempts, please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+    trustProxy: true
   });
 
   // Validation schemas

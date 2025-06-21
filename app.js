@@ -29,6 +29,9 @@ const io = new Server(server, {
   }
 });
 
+// Trust proxy for rate limiting and proper IP detection
+app.set('trust proxy', 1);
+
 // Security middleware with CSP configuration for admin panel
 app.use(helmet({
   contentSecurityPolicy: {
@@ -58,7 +61,10 @@ app.use(express.urlencoded({ extended: true }));
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: 100, // limit each IP to 100 requests per windowMs
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  trustProxy: true // Trust proxy headers for correct IP detection
 });
 app.use('/api/', limiter);
 
