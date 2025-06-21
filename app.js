@@ -5,7 +5,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
-const { Deepgram } = require('@deepgram/sdk');
+const { createClient } = require('@deepgram/sdk');
 const WebSocket = require('ws');
 const path = require('path');
 require('dotenv').config();
@@ -40,8 +40,8 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// Initialize Deepgram
-const deepgram = new Deepgram(process.env.DEEPGRAM_API_KEY);
+// Initialize Deepgram with v3 syntax
+const deepgram = createClient(process.env.DEEPGRAM_API_KEY || 'your-api-key');
 
 // Initialize SaaS managers
 const authManager = new AuthManager();
@@ -237,7 +237,7 @@ async function generateAIResponse(userInput, conversationHistory, config) {
 
 async function sendAIResponse(ws, text, voice = 'aura-odysseus-en') {
   try {
-    // Generate speech using Deepgram's TTS
+    // Generate speech using Deepgram's TTS (v3 API)
     const response = await deepgram.speak.request(
       { text },
       {
