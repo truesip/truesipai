@@ -3,12 +3,46 @@ const { initDatabase, User } = require('./src/database/models');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
+// Check environment variables
+function checkEnvironmentVariables() {
+  console.log('🔧 Checking environment variables...');
+  
+  const requiredVars = {
+    'JWT_SECRET': process.env.JWT_SECRET,
+    'DEFAULT_ADMIN_EMAIL': process.env.DEFAULT_ADMIN_EMAIL,
+    'DEFAULT_ADMIN_PASSWORD': process.env.DEFAULT_ADMIN_PASSWORD,
+    'NODE_ENV': process.env.NODE_ENV
+  };
+  
+  let allGood = true;
+  
+  for (const [varName, value] of Object.entries(requiredVars)) {
+    if (!value || value.includes('your_') || value.includes('change_')) {
+      console.log(`⚠️  ${varName}: ${value || 'NOT SET'} (needs to be configured)`);
+      if (varName === 'JWT_SECRET' || varName === 'DEFAULT_ADMIN_EMAIL') {
+        allGood = false;
+      }
+    } else {
+      console.log(`✅ ${varName}: ${varName.includes('PASSWORD') ? '***hidden***' : value}`);
+    }
+  }
+  
+  return allGood;
+}
+
 async function debugAuthentication() {
   console.log('🔍 Starting authentication debug...');
   
+  // Check environment variables first
+  if (!checkEnvironmentVariables()) {
+    console.log('\n⚠️  Some environment variables need to be configured.');
+    console.log('Please check your .env file and restart the application.');
+    return;
+  }
+  
   try {
     // Initialize database
-    console.log('📄 Initializing database...');
+    console.log('\n📄 Initializing database...');
     await initDatabase();
     
     // Create auth manager
