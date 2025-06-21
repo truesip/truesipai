@@ -222,21 +222,21 @@
         <div id="loginAlert" class="alert alert-error hidden"></div>
         
         <div class="demo-credentials">
-            <h4>🎆 Demo Account</h4>
-            <p><strong>Email:</strong> demo@example.com</p>
-            <p><strong>Password:</strong> DemoUser123!</p>
+            <h4>🎆 Default Admin Account</h4>
+            <p><strong>Email:</strong> admin@deepgram-ai.com</p>
+            <p><strong>Password:</strong> Admin123!@#</p>
             <p style="color: #667eea; margin-top: 8px;">Use this account to test the platform</p>
         </div>
         
         <form id="loginForm">
             <div class="form-group">
                 <label for="email">Email Address</label>
-                <input type="email" id="email" value="demo@example.com" required>
+                <input type="email" id="email" value="admin@deepgram-ai.com" required>
             </div>
             
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" value="DemoUser123!" required>
+                <input type="password" id="password" value="Admin123!@#" required>
             </div>
             
             <button type="submit" class="btn" id="loginBtn">
@@ -315,7 +315,7 @@
                 
                 const data = await response.json();
                 
-                if (response.ok) {
+                if (response.ok && data.success) {
                     // Store token and redirect
                     localStorage.setItem('userToken', data.token);
                     
@@ -323,7 +323,7 @@
                     
                     // Redirect based on user role
                     setTimeout(() => {
-                        if (data.user.role === 'admin' || data.user.role === 'super_admin') {
+                        if (data.user && (data.user.role === 'admin' || data.user.role === 'super_admin')) {
                             window.location.href = '/admin-panel';
                         } else {
                             window.location.href = '/dashboard';
