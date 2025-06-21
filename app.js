@@ -27,8 +27,28 @@ const io = new Server(server, {
   }
 });
 
-// Security middleware
-app.use(helmet());
+// Security middleware with CSP configuration for admin panel
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: [
+        "'self'", 
+        "'unsafe-inline'", // Allow inline scripts for admin panel
+        "'unsafe-eval'"    // Allow eval for dynamic content
+      ],
+      scriptSrcAttr: ["'unsafe-inline'"], // Allow onclick handlers
+      styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "wss:", "ws:"], // Allow WebSocket connections
+      fontSrc: ["'self'", "https:", "data:"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"]
+    },
+  },
+  crossOriginEmbedderPolicy: false // Disable for WebSocket compatibility
+}));
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
